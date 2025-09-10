@@ -1,0 +1,29 @@
+body, html { 
+    margin: 0; 
+    padding: 0; 
+    height: 100%; 
+    box-sizing: border-box; 
+}
+
+#grid-container {
+    height: 95%; /* Adjust height to make space for status bar */
+    width: 100%;
+}
+
+#custom-status-bar {
+    padding: 8px;
+    font-size: 14px;
+    font-family: sans-serif;
+    border-top: 1px solid #ccc;
+    background-color: #f8f8f8;
+    height: 5%;
+    box-sizing: border-box;
+}
+
+.ag-header-cell-label {
+    justify-content: center;
+}
+
+.ag-floating-filter-input {
+    width: 100%;
+}
