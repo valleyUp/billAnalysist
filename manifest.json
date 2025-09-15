@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "信用卡账单分析器",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "自动分析信用卡账单邮件中的交易数据",
   "permissions": [
     "activeTab",
@@ -25,9 +25,10 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "assets/ag-grid/ag-grid.css",
-        "assets/ag-grid/ag-theme-alpine.css",
-        "assets/ag-grid/ag-grid-community.min.js"
+        "assets/ag-grid/ag-grid-loader.js",
+        "assets/ag-grid/ag-grid-community.min.js",
+        "assets/*",
+        "analysis/analysis.html"
       ],
       "matches": [ "<all_urls>" ]
     }
