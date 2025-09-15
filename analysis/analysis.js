@@ -236,7 +236,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const gridOptions = {
                 columnDefs: columnDefs,
                 rowData: data.transactionsData,
-                theme: 'quartz', // Use the new Quartz theme
                 defaultColDef: {
                     resizable: true,
                     floatingFilter: true,
@@ -244,9 +243,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                     cellDataType: false
                 },
                 animateRows: true,
-                enableRangeSelection: true,
-                rowSelection: 'multiple',
-                suppressRowClickSelection: true,
+                rowSelection: {
+                    mode: 'multiRow',
+                    enableClickSelection: false
+                },
                 pagination: true,
                 paginationPageSize: 50,
                 rowHeight: 48,
