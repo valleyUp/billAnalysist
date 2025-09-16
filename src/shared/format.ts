@@ -20,13 +20,28 @@ export const formatDate = (value: string): string => {
   return dayjs(value).format('YYYY年MM月DD日');
 };
 
+export const resolveFlowLabel = (record: EnrichedTransaction): string => {
+  if (record.flow === 'expense') {
+    return '支出';
+  }
+
+  const incomeType = record.incomeType ?? 'refund';
+  if (incomeType === 'repayment') {
+    return '还款';
+  }
+  if (incomeType === 'refund') {
+    return '退款';
+  }
+  return '收入';
+};
+
 export const toCsv = (records: EnrichedTransaction[]): string => {
-  const header = ['交易日期', '商户', '分类', '收支方向', '金额'];
+  const header = ['交易日期', '商户', '分类', '金额方向', '金额'];
   const rows = records.map((record) => [
     record.transactionDate,
     record.merchant.replace(/"/g, '""'),
     record.category,
-    record.flow === 'expense' ? '支出' : '收入',
+    resolveFlowLabel(record),
     record.amount.toFixed(2)
   ]);
   const csvLines = [header.join(','), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))];

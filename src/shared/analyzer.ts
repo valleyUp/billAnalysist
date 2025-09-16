@@ -4,6 +4,7 @@ import type {
   AnalysisResult,
   AnalysisSummary,
   EnrichedTransaction,
+  IncomeType,
   Transaction
 } from './types';
 
@@ -41,13 +42,24 @@ export class BillAnalyzer {
     const records: EnrichedTransaction[] = transactions.map((transaction) => {
       const amount = Number(transaction.amount);
       const flow = amount >= 0 ? 'income' : 'expense';
+      const merchant = transaction.merchant || '未知商户';
+      let incomeType: IncomeType | null = null;
+
+      if (flow === 'income') {
+        const normalizedMerchant = merchant.toLowerCase();
+        const isRepayment = repaymentKeywords.some((keyword) =>
+          normalizedMerchant.includes(keyword.toLowerCase())
+        );
+        incomeType = isRepayment ? 'repayment' : 'refund';
+      }
 
       return {
         transactionDate: transaction.transactionDate,
-        merchant: transaction.merchant || '未知商户',
+        merchant,
         amount,
         category: this.classify(transaction.merchant),
-        flow
+        flow,
+        incomeType
       };
     });
 
@@ -64,10 +76,7 @@ export class BillAnalyzer {
         categorySummary[record.category] = (categorySummary[record.category] || 0) + expense;
       } else {
         totalIncome += record.amount;
-        const isRepayment = repaymentKeywords.some((keyword) =>
-          record.merchant.includes(keyword)
-        );
-        if (isRepayment) {
+        if (record.incomeType === 'repayment') {
           repaymentAmount += record.amount;
         } else {
           refundAmount += record.amount;

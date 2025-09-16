@@ -18,7 +18,7 @@ import {
   Tooltip,
   useMantineColorScheme
 } from '@mantine/core';
-import { IconMoonStars, IconRefresh, IconSun } from '@tabler/icons-react';
+import { IconEye, IconEyeOff, IconMoonStars, IconRefresh, IconSun } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { TransactionTable } from './components/TransactionTable';
 import { formatCurrency, formatSignedCurrency } from '../shared/format';
@@ -44,6 +44,7 @@ const AnalysisApp = () => {
   const [records, setRecords] = useState<EnrichedTransaction[]>([]);
   const [summary, setSummary] = useState<AnalysisSummary | null>(null);
   const [generatedAt, setGeneratedAt] = useState<number | null>(null);
+  const [showOverview, setShowOverview] = useState(true);
 
   const refresh = async () => {
     setLoading(true);
@@ -122,77 +123,83 @@ const AnalysisApp = () => {
   }
 
   return (
-    <Stack p="xl" gap="lg">
-      <HeaderBar lastUpdated={lastUpdated} />
+    <Stack p="xl" gap="md">
+      <HeaderBar
+        lastUpdated={lastUpdated}
+        onRefresh={refresh}
+        showOverview={showOverview}
+        onToggleOverview={() => setShowOverview((value) => !value)}
+      />
 
-      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg">
-        <StatCard label="交易笔数" value={`${summary.totalTransactions} 笔`} />
-        <StatCard label="总支出" value={formatCurrency(summary.totalExpense)} accent="green" />
-        <StatCard label="总收入" value={formatCurrency(summary.totalIncome)} accent="red" />
-        <StatCard label="净支出" value={formatSignedCurrency(summary.netExpense)} />
-        <StatCard label="还款金额" value={formatCurrency(summary.repaymentAmount)} />
-        <StatCard label="退款金额" value={formatCurrency(summary.refundAmount)} />
-      </SimpleGrid>
+      {showOverview && (
+        <>
+          <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 6 }} spacing="lg">
+            <StatCard label="交易笔数" value={`${summary.totalTransactions} 笔`} />
+            <StatCard label="总支出" value={formatCurrency(summary.totalExpense)} accent="green" />
+            <StatCard label="总收入" value={formatCurrency(summary.totalIncome)} accent="red" />
+            <StatCard label="净支出" value={formatSignedCurrency(summary.netExpense)} />
+            <StatCard label="还款金额" value={formatCurrency(summary.repaymentAmount)} />
+            <StatCard label="退款金额" value={formatCurrency(summary.refundAmount)} />
+          </SimpleGrid>
 
-      <Card withBorder radius="lg" padding="lg">
-        <Stack gap="sm">
-          <Group justify="space-between" align="flex-start">
-            <div>
-              <Text fw={600}>分类统计</Text>
-              <Text size="xs" c="dimmed">
-                自动根据商户关键字归类，可在 `src/data/categories.json` 中维护。
-              </Text>
-            </div>
-            <RefreshButton onRefresh={refresh} />
-          </Group>
-          {categoryEntries.length === 0 ? (
-            <Text c="dimmed" size="sm">
-              暂无分类数据。
-            </Text>
-          ) : (
-            <ScrollArea h={240} type="hover">
-              <Table horizontalSpacing="md" verticalSpacing="sm" highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>分类</Table.Th>
-                    <Table.Th ta="right">金额</Table.Th>
-                    <Table.Th style={{ width: 200 }}>占比</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {categoryEntries.map((entry, index) => (
-                    <Table.Tr key={entry.category}>
-                      <Table.Td>
-                        <Group gap="xs">
-                          <Badge
-                            radius="sm"
-                            variant={index === 0 ? 'filled' : 'light'}
-                            color={index === 0 ? 'blue' : 'gray'}
-                          >
-                            {index + 1}
-                          </Badge>
-                          <Text fw={600}>{entry.category}</Text>
-                        </Group>
-                      </Table.Td>
-                      <Table.Td ta="right">
-                        <Text fw={600}>{formatCurrency(entry.amount)}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Stack gap={6}>
-                          <Progress value={Math.min(100, entry.ratio)} color="blue" size="xs" radius="xl" />
-                          <Text size="xs" ta="right" fw={500} c="dimmed">
-                            {entry.ratio.toFixed(1)}%
-                          </Text>
-                        </Stack>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </ScrollArea>
-          )}
-        </Stack>
-      </Card>
+          <Card withBorder radius="lg" padding="lg">
+            <Stack gap="sm">
+              <div>
+                <Text fw={600}>分类统计</Text>
+                <Text size="xs" c="dimmed">
+                  自动根据商户关键字归类，可在 `src/data/categories.json` 中维护。
+                </Text>
+              </div>
+              {categoryEntries.length === 0 ? (
+                <Text c="dimmed" size="sm">
+                  暂无分类数据。
+                </Text>
+              ) : (
+                <ScrollArea h={220} type="hover">
+                  <Table horizontalSpacing="md" verticalSpacing="sm" highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>分类</Table.Th>
+                        <Table.Th ta="right">金额</Table.Th>
+                        <Table.Th style={{ width: 200 }}>占比</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {categoryEntries.map((entry, index) => (
+                        <Table.Tr key={entry.category}>
+                          <Table.Td>
+                            <Group gap="xs">
+                              <Badge
+                                radius="sm"
+                                variant={index === 0 ? 'filled' : 'light'}
+                                color={index === 0 ? 'blue' : 'gray'}
+                              >
+                                {index + 1}
+                              </Badge>
+                              <Text fw={600}>{entry.category}</Text>
+                            </Group>
+                          </Table.Td>
+                          <Table.Td ta="right">
+                            <Text fw={600}>{formatCurrency(entry.amount)}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Stack gap={6}>
+                              <Progress value={Math.min(100, entry.ratio)} color="blue" size="xs" radius="xl" />
+                              <Text size="xs" ta="right" fw={500} c="dimmed">
+                                {entry.ratio.toFixed(1)}%
+                              </Text>
+                            </Stack>
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </Stack>
+          </Card>
+        </>
+      )}
 
       <Card withBorder radius="lg" padding="lg">
         <Stack gap="sm">
@@ -243,7 +250,17 @@ const RefreshButton = ({ onRefresh }: { onRefresh: () => void }) => (
   </Tooltip>
 );
 
-const HeaderBar = ({ lastUpdated }: { lastUpdated: string }) => {
+const HeaderBar = ({
+  lastUpdated,
+  onRefresh,
+  showOverview,
+  onToggleOverview
+}: {
+  lastUpdated: string;
+  onRefresh: () => void;
+  showOverview: boolean;
+  onToggleOverview: () => void;
+}) => {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const isDark = colorScheme === 'dark';
 
@@ -257,6 +274,12 @@ const HeaderBar = ({ lastUpdated }: { lastUpdated: string }) => {
       </Stack>
       <Group gap="sm">
         <Badge variant="light">最后更新：{lastUpdated}</Badge>
+        <Tooltip label={showOverview ? '隐藏统计概览' : '显示统计概览'}>
+          <ActionIcon variant="light" onClick={onToggleOverview} aria-label="切换统计概览">
+            {showOverview ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+          </ActionIcon>
+        </Tooltip>
+        <RefreshButton onRefresh={onRefresh} />
         <Tooltip label="切换主题">
           <ActionIcon
             variant="light"

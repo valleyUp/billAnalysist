@@ -6,9 +6,12 @@ export interface Transaction {
 
 export type CashFlow = 'income' | 'expense';
 
+export type IncomeType = 'refund' | 'repayment';
+
 export interface EnrichedTransaction extends Transaction {
   category: string;
   flow: CashFlow;
+  incomeType: IncomeType | null;
 }
 
 export interface CategorySummary {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
-  ActionIcon,
   Badge,
+  Button,
   Group,
   MultiSelect,
   ScrollArea,
@@ -9,8 +9,7 @@ import {
   Stack,
   Table,
   Text,
-  TextInput,
-  Tooltip
+  TextInput
 } from '@mantine/core';
 import {
   IconArrowDown,
@@ -19,7 +18,7 @@ import {
   IconSearch,
   IconX
 } from '@tabler/icons-react';
-import { formatCurrency, formatDate } from '../../shared/format';
+import { formatCurrency, formatDate, resolveFlowLabel } from '../../shared/format';
 import type { EnrichedTransaction } from '../../shared/types';
 
 type SortKey = 'transactionDate' | 'merchant' | 'amount' | 'category';
@@ -35,9 +34,26 @@ interface TransactionTableProps {
 
 const defaultSort: SortState = { key: 'transactionDate', direction: 'desc' };
 
+type FlowFilter = 'spending' | 'repayment' | 'all';
+
+const resolveFlowColor = (record: EnrichedTransaction): string => {
+  if (record.flow === 'expense') {
+    return 'green';
+  }
+
+  const incomeType = record.incomeType ?? 'refund';
+  if (incomeType === 'repayment') {
+    return 'orange';
+  }
+  if (incomeType === 'refund') {
+    return 'blue';
+  }
+  return 'red';
+};
+
 export const TransactionTable = ({ records }: TransactionTableProps) => {
   const [search, setSearch] = useState('');
-  const [flowFilter, setFlowFilter] = useState<'all' | 'expense' | 'income'>('all');
+  const [flowFilter, setFlowFilter] = useState<FlowFilter>('spending');
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [sort, setSort] = useState<SortState>(defaultSort);
 
@@ -53,8 +69,17 @@ export const TransactionTable = ({ records }: TransactionTableProps) => {
         ? record.merchant.toLowerCase().includes(search.toLowerCase()) ||
           record.category.toLowerCase().includes(search.toLowerCase())
         : true;
-      const matchesFlow =
-        flowFilter === 'all' ? true : record.flow === flowFilter;
+      const matchesFlow = (() => {
+        switch (flowFilter) {
+          case 'spending':
+            return record.flow === 'expense' || record.incomeType === 'refund';
+          case 'repayment':
+            return record.incomeType === 'repayment';
+          case 'all':
+          default:
+            return true;
+        }
+      })();
       const matchesCategory =
         categoryFilter.length === 0 || categoryFilter.includes(record.category);
 
@@ -94,13 +119,22 @@ export const TransactionTable = ({ records }: TransactionTableProps) => {
         if (transaction.flow === 'expense') {
           acc.expense += Math.abs(transaction.amount);
         } else {
-          acc.income += transaction.amount;
+          const amount = transaction.amount;
+          acc.income += amount;
+          const incomeType = transaction.incomeType ?? 'refund';
+          if (incomeType === 'repayment') {
+            acc.repayment += amount;
+          } else {
+            acc.refund += amount;
+          }
         }
         return acc;
       },
-      { expense: 0, income: 0 }
+      { expense: 0, income: 0, refund: 0, repayment: 0 }
     );
   }, [filtered]);
+
+  const netExpense = filteredTotals.expense - filteredTotals.refund;
 
   const toggleSort = (key: SortKey) => {
     setSort((current) => {
@@ -114,7 +148,7 @@ export const TransactionTable = ({ records }: TransactionTableProps) => {
 
   const clearFilters = () => {
     setSearch('');
-    setFlowFilter('all');
+    setFlowFilter('spending');
     setCategoryFilter([]);
     setSort(defaultSort);
   };
@@ -150,25 +184,46 @@ export const TransactionTable = ({ records }: TransactionTableProps) => {
         />
         <SegmentedControl
           data={[
-            { label: '全部', value: 'all' },
-            { label: '支出', value: 'expense' },
-            { label: '收入', value: 'income' }
+            { label: '收支', value: 'spending' },
+            { label: '还款', value: 'repayment' },
+            { label: '全部', value: 'all' }
           ]}
           value={flowFilter}
-          onChange={(value: 'all' | 'expense' | 'income') => setFlowFilter(value)}
+          onChange={(value) => setFlowFilter(value as FlowFilter)}
+          size="sm"
         />
-        <Tooltip label="重置筛选与排序">
-          <ActionIcon variant="light" onClick={clearFilters} aria-label="重置筛选">
-            <IconX size={16} />
-          </ActionIcon>
-        </Tooltip>
+        <Button
+          variant="light"
+          size="sm"
+          leftSection={<IconX size={14} />}
+          onClick={clearFilters}
+        >
+          重置
+        </Button>
       </Group>
 
-      <Text size="xs" c="dimmed">
-        显示 {sortedRecords.length} / {records.length} 条 | 支出 {formatCurrency(filteredTotals.expense)} · 收入 {formatCurrency(filteredTotals.income)}
-      </Text>
+      <Group gap="xs" wrap="wrap" align="center">
+        <Text size="xs" c="dimmed">
+          显示 {sortedRecords.length} / {records.length} 条
+        </Text>
+        <Badge size="sm" color="green" variant="light">
+          支出 {formatCurrency(filteredTotals.expense)}
+        </Badge>
+        <Badge size="sm" color="red" variant="light">
+          总收入 {formatCurrency(filteredTotals.income)}
+        </Badge>
+        <Badge size="sm" color="blue" variant="light">
+          退款 {formatCurrency(filteredTotals.refund)}
+        </Badge>
+        <Badge size="sm" color="orange" variant="light">
+          还款 {formatCurrency(filteredTotals.repayment)}
+        </Badge>
+        <Badge size="sm" color="dark" variant="outline">
+          净支出 {netExpense >= 0 ? formatCurrency(netExpense) : `-${formatCurrency(Math.abs(netExpense))}`}
+        </Badge>
+      </Group>
 
-      <ScrollArea h={420} type="hover">
+      <ScrollArea h="65vh" type="hover">
         <Table highlightOnHover stickyHeader>
           <Table.Thead>
             <Table.Tr>
@@ -229,12 +284,12 @@ export const TransactionTable = ({ records }: TransactionTableProps) => {
                         {transaction.merchant}
                       </Text>
                       <Badge
-                        color={transaction.flow === 'expense' ? 'green' : 'red'}
+                        color={resolveFlowColor(transaction)}
                         variant="light"
                         radius="sm"
                         w="fit-content"
                       >
-                        {transaction.flow === 'expense' ? '支出' : '收入'}
+                        {resolveFlowLabel(transaction)}
                       </Badge>
                     </Stack>
                   </Table.Td>
@@ -244,8 +299,13 @@ export const TransactionTable = ({ records }: TransactionTableProps) => {
                     </Badge>
                   </Table.Td>
                   <Table.Td ta="right">
-                    <Text fw={600} c={transaction.flow === 'expense' ? 'green' : 'red'}>
-                      {formatCurrency(Math.abs(transaction.amount))}
+                    <Text
+                      fw={600}
+                      c={transaction.flow === 'expense' ? 'green' : resolveFlowColor(transaction)}
+                    >
+                      {transaction.flow === 'expense'
+                        ? formatCurrency(Math.abs(transaction.amount))
+                        : formatCurrency(transaction.amount)}
                     </Text>
                   </Table.Td>
                 </Table.Tr>
