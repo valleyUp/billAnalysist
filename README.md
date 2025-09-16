@@ -5,19 +5,22 @@
 ## 功能特性
 
 - 🔍 自动检测邮箱中的信用卡账单页面
+- ⚛️ 基于 React + Mantine 构建弹窗与分析页面，体验更加现代
 - 📊 提取交易日期、商户名称、交易金额数据
-- 📈 生成详细的消费分析报告
-- 💾 支持导出分析结果为CSV文件
+- 📈 生成详细的消费分析报告，并展示按分类、金额占比等统计
+- 💾 支持导出分析结果为 CSV 文件
 - 🎯 智能分类消费类型（餐饮、交通、购物等）
-- 📋 详细的交易数据表格视图，支持筛选和排序
+- 🧮 Mantine Table 替换 AG Grid，提供内置的筛选、排序、检索能力
 
 ## 安装方法
 
 1. 打开Chrome浏览器，进入扩展管理页面：`chrome://extensions/`
-2. 开启"开发者模式"
-3. 点击"加载已解压的扩展程序"
-4. 选择 `chrome-extension-refactor/src` 文件夹路径
-5. 扩展安装完成
+2. 开启“开发者模式”
+3. 在项目根目录执行 `npm install`
+4. 构建产物：`npm run build`
+5. 在扩展管理页点击“加载已解压的扩展程序”
+6. 选择生成的 `dist` 目录
+7. 扩展安装完成
 
 ## 使用方法
 
@@ -43,33 +46,48 @@
 ## 文件结构
 
 ```
-chrome-extension-refactor/
+.
+├── public/
+│   └── manifest.json              # MV3 清单文件，构建时复制到 dist
 ├── src/
-│   ├── manifest.json          # 扩展配置文件
-│   ├── popup/                 # 弹出窗口界面
-│   │   ├── popup.html
-│   │   └── popup.js
-│   ├── background/            # 后台分析逻辑
-│   │   └── background.js
-│   ├── analysis/              # 详细分析页面
-│   │   ├── analysis.html
-│   │   └── analysis.js
-│   └── assets/                # 静态资源文件
-│       ├── ag-grid/           # 表格组件库
-│       ├── popup.css
-│       ├── analysis.css
-│       └── categories.json    # 分类规则文件
-└── README.md                  # 说明文档
+│   ├── background/
+│   │   └── index.ts               # 服务工作线程，负责分类与分析
+│   ├── popup/
+│   │   ├── index.html
+│   │   └── main.tsx               # React 弹窗入口
+│   ├── analysis/
+│   │   ├── index.html
+│   │   ├── main.tsx               # React 账单详情入口
+│   │   └── components/
+│   │       └── TransactionTable.tsx
+│   ├── shared/
+│   │   ├── analyzer.ts            # 分类与报表逻辑
+│   │   ├── format.ts              # 金额、导出等工具函数
+│   │   └── types.ts               # 公共类型定义
+│   ├── styles/
+│   │   └── global.css             # 全局样式重置
+│   └── data/
+│       └── categories.json        # 消费分类关键字
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
 ```
 
 ## 开发说明
 
-该项目完全基于JavaScript/HTML/CSS开发，无需任何后端服务或Python环境。所有功能都在浏览器扩展环境中运行。
+该项目基于 React + TypeScript 构建，通过 Vite 输出符合 Manifest V3 的扩展包，无需任何后端服务。所有分析逻辑均在浏览器侧完成。
+
+### 开发命令
+
+- `npm run dev`：Vite 开启构建监听，适合在开发阶段实时生成 `dist`
+- `npm run build`：生成用于加载的 `dist` 目录
+- `npm run lint`：执行 TypeScript 类型检查
 
 ### 项目特点
 
-1. 使用Chrome Extension Manifest V3 API
-2. 采用模块化结构，便于维护和扩展
-3. 使用ag-Grid进行数据展示，提供良好的用户体验
-4. 支持实时数据筛选和排序
-5. 包含完整的交易分类系统
+1. 使用 Chrome Extension Manifest V3 API
+2. 使用 React + Mantine 实现弹窗与分析页的现代化界面
+3. Mantine Table 支撑筛选、排序、搜索等详细账目操作
+4. BillAnalyzer 服务工作线程统一负责分类、汇总逻辑
+5. 所有数据在本地运行，无需远程依赖

@@ -1,5 +1,30 @@
 {
+  "name": "bill-analysist-extension",
+  "version": "2.2.0",
+  "description": "React-based Chrome extension for credit card bill analysis",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
+  },
   "dependencies": {
-    "@playwright/test": "^1.55.0"
+    "@emotion/react": "^11.11.4",
+    "@mantine/core": "^7.10.0",
+    "@mantine/hooks": "^7.10.0",
+    "dayjs": "^1.11.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@tabler/icons-react": "^3.13.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/chrome": "^0.0.246",
+    "@types/react": "^18.2.46",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react-swc": "^3.6.0",
+    "typescript": "^5.4.2",
+    "vite": "^5.2.0"
   }
 }

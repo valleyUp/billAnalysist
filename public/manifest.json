@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "信用卡账单分析器",
-  "version": "2.1.0",
-  "description": "自动分析信用卡账单邮件中的交易数据",
+  "version": "2.2.0",
+  "description": "使用 React 和 Mantine 构建的智能信用卡账单分析扩展",
   "permissions": [
     "activeTab",
     "scripting",
@@ -16,21 +16,22 @@
     "https://mail.126.com/*"
   ],
   "action": {
-    "default_popup": "popup/popup.html",
+    "default_popup": "popup/index.html",
     "default_title": "分析账单"
   },
   "background": {
-    "service_worker": "background/background.js"
+    "service_worker": "assets/background.js",
+    "type": "module"
   },
   "web_accessible_resources": [
     {
       "resources": [
-        "assets/ag-grid/ag-grid-loader.js",
-        "assets/ag-grid/ag-grid-community.min.js",
-        "assets/*",
-        "analysis/analysis.html"
+        "analysis/index.html",
+        "assets/*"
       ],
-      "matches": [ "<all_urls>" ]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }
