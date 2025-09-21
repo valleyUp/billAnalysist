@@ -50,24 +50,31 @@
 ├── public/
 │   └── manifest.json              # MV3 清单文件，构建时复制到 dist
 ├── src/
+│   ├── apps/
+│   │   ├── popup/
+│   │   │   ├── index.html
+│   │   │   ├── main.tsx           # Popup 入口 (挂载 React)
+│   │   │   └── PopupApp.tsx       # Popup 应用逻辑
+│   │   └── analysis/
+│   │       ├── index.html
+│   │       ├── main.tsx           # 分析页入口 (挂载 React)
+│   │       ├── AnalysisApp.tsx    # 分析页主体逻辑
+│   │       └── components/
+│   │           └── TransactionTable.tsx
 │   ├── background/
-│   │   └── index.ts               # 服务工作线程，负责分类与分析
-│   ├── popup/
-│   │   ├── index.html
-│   │   └── main.tsx               # React 弹窗入口
-│   ├── analysis/
-│   │   ├── index.html
-│   │   ├── main.tsx               # React 账单详情入口
-│   │   └── components/
-│   │       └── TransactionTable.tsx
-│   ├── shared/
-│   │   ├── analyzer.ts            # 分类与报表逻辑
-│   │   ├── format.ts              # 金额、导出等工具函数
-│   │   └── types.ts               # 公共类型定义
-│   ├── styles/
-│   │   └── global.css             # 全局样式重置
-│   └── data/
-│       └── categories.json        # 消费分类关键字
+│   │   └── index.ts               # Service Worker，负责后台分析
+│   ├── lib/
+│   │   ├── analyzer/
+│   │   │   ├── BillAnalyzer.ts
+│   │   │   └── index.ts
+│   │   ├── data/
+│   │   │   └── categories.json    # 消费分类关键字
+│   │   ├── format/
+│   │   │   └── index.ts           # 金额、日期、CSV 工具
+│   │   └── types/
+│   │       └── index.ts           # 公共类型定义
+│   └── styles/
+│       └── global.css             # 全局样式重置
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
@@ -89,5 +96,5 @@
 1. 使用 Chrome Extension Manifest V3 API
 2. 使用 React + Mantine 实现弹窗与分析页的现代化界面
 3. Mantine Table 支撑筛选、排序、搜索等详细账目操作
-4. BillAnalyzer 服务工作线程统一负责分类、汇总逻辑
+4. `lib/analyzer` 中的 `BillAnalyzer` 服务工作线程统一负责分类、汇总逻辑
 5. 所有数据在本地运行，无需远程依赖

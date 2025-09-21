@@ -14,7 +14,14 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "lib/*": ["lib/*"],
+      "styles/*": ["styles/*"],
+      "apps/*": ["apps/*"]
+    }
   },
   "include": ["src"]
 }

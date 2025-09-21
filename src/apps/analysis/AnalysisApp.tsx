@@ -21,8 +21,8 @@ import {
 import { IconEye, IconEyeOff, IconMoonStars, IconRefresh, IconSun } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { TransactionTable } from './components/TransactionTable';
-import { formatCurrency, formatSignedCurrency } from '../shared/format';
-import type { AnalysisSummary, EnrichedTransaction } from '../shared/types';
+import { formatCurrency, formatSignedCurrency } from 'lib/format';
+import type { AnalysisSummary, EnrichedTransaction } from 'lib/types';
 
 const fetchFromStorage = async () => {
   return new Promise<{
@@ -147,7 +147,7 @@ const AnalysisApp = () => {
               <div>
                 <Text fw={600}>分类统计</Text>
                 <Text size="xs" c="dimmed">
-                  自动根据商户关键字归类，可在 `src/data/categories.json` 中维护。
+                  自动根据商户关键字归类，可在 `src/lib/data/categories.json` 中维护。
                 </Text>
               </div>
               {categoryEntries.length === 0 ? (

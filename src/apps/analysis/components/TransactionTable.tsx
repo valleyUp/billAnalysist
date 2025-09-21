@@ -18,8 +18,8 @@ import {
   IconSearch,
   IconX
 } from '@tabler/icons-react';
-import { formatCurrency, formatDate, resolveFlowLabel } from '../../shared/format';
-import type { EnrichedTransaction } from '../../shared/types';
+import { formatCurrency, formatDate, resolveFlowLabel } from 'lib/format';
+import type { EnrichedTransaction } from 'lib/types';
 
 type SortKey = 'transactionDate' | 'merchant' | 'amount' | 'category';
 

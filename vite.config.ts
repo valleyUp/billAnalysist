@@ -14,7 +14,7 @@ const renameHtmlPlugin = (): Plugin => ({
     await Promise.all(
       htmlFiles.map(async (fileName) => {
         const sourcePath = resolve(outDir, fileName);
-        const targetFileName = fileName.replace(/^src\//, '');
+        const targetFileName = fileName.replace(/^src\/(apps\/)?/, '');
         const targetPath = resolve(outDir, targetFileName);
 
         await fs.mkdir(dirname(targetPath), { recursive: true });
@@ -28,6 +28,13 @@ const renameHtmlPlugin = (): Plugin => ({
 });
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      lib: resolve(__dirname, 'src/lib'),
+      styles: resolve(__dirname, 'src/styles'),
+      apps: resolve(__dirname, 'src/apps')
+    }
+  },
   plugins: [react(), renameHtmlPlugin()],
   build: {
     outDir: 'dist',
@@ -35,8 +42,8 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       input: {
-        'popup/index': resolve(__dirname, 'src/popup/index.html'),
-        'analysis/index': resolve(__dirname, 'src/analysis/index.html'),
+        'popup/index': resolve(__dirname, 'src/apps/popup/index.html'),
+        'analysis/index': resolve(__dirname, 'src/apps/analysis/index.html'),
         background: resolve(__dirname, 'src/background/index.ts')
       },
       output: {

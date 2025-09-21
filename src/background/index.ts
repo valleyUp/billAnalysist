@@ -1,5 +1,5 @@
-import { BillAnalyzer } from '../shared/analyzer';
-import type { AnalysisResult, Transaction } from '../shared/types';
+import { BillAnalyzer } from 'lib/analyzer';
+import type { AnalysisResult, Transaction } from 'lib/types';
 
 const analyzer = new BillAnalyzer();
 
